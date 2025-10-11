@@ -1,44 +1,18 @@
-# Limine C Template
+# Google® Balls Kernel
 
-This repository will demonstrate how to set up a basic kernel in C using Limine.
+Why bother with clunky and outdated operating systems for your computing like Linux® or Windows® when Google® Balls Kernel covers all of your computing needs perfectly!
 
-## How to use this?
+No updates, no internet, **EXTREMELY LIGHTWEIGHT AND FAST**, **PRODUCTION READY**, **NO SOCIAL MEDIA**. Perfect for anyone including terminally online people and brainrotted indiviuals!
 
-### Dependencies
+### System Requirements
+- A modern 64-bit x86 processor (You probably have one) which usually comes on hardware made after 2005. If you have Apple® Silicon or a 64-bit ARM® computer, you're stuck with the UEFI port.
+- 24 bit color depth capable video card (Comes on most Windows® XP era computers and later)
+- PS/2 keyboard (USB keyboards can work if you have PS/2 emulation bundled with your BIOS, if not you'll have to use the UEFI port which is coming later)
+- 8 megabytes of memory (on non-UEFI systems)
+- 128 megabytes of memory (on UEFI systems)
 
-Any `make` command depends on GNU make (`gmake`) and is expected to be run using it. This usually means using `make` on most GNU/Linux distros, or `gmake` on other non-GNU systems.
-
-It is recommended to build this project using a standard UNIX-like system, using a Clang/LLVM toolchain capable of cross compilation.
-
-Additionally, building an ISO with `make all` requires `xorriso`, and building a HDD/USB image with `make all-hdd` requires `sgdisk` (usually from `gdisk` or `gptfdisk` packages) and `mtools`.
-
-### Toolchain selection
-
-The `TOOLCHAIN` and `TOOLCHAIN_PREFIX` `make` variables can be used to set the toolchain. `TOOLCHAIN` can be set to `llvm` to use Clang/LLVM.
-
-For example:
-```
-make TOOLCHAIN=llvm
-```
-or:
-```
-make TOOLCHAIN_PREFIX=x86_64-elf-
-```
-
-### Architectural targets
-
-The `ARCH` make variable determines the target architecture to build the kernel and image for.
-
-The default `ARCH` is `x86_64`. Other options include: `aarch64`, `loongarch64`, and `riscv64`.
-
-### Makefile targets
-
-Running `make all` will compile the kernel (from the `kernel/` directory) and then generate a bootable ISO image.
-
-Running `make all-hdd` will compile the kernel and then generate a raw image suitable to be flashed onto a USB stick or hard drive/SSD.
-
-Running `make run` will build the kernel and a bootable ISO (equivalent to make all) and then run it using `qemu` (if installed).
-
-Running `make run-hdd` will build the kernel and a raw HDD image (equivalent to make all-hdd) and then run it using `qemu` (if installed).
-
-For x86_64, the `run-bios` and `run-hdd-bios` targets are equivalent to their non `-bios` counterparts except that they boot `qemu` using the default SeaBIOS firmware instead of OVMF.
+### How to use
+- Turn on computer
+- Use the arrow keys to move the cursor and watch Google® Balls react for a few minutes or hours
+- Turn off computer
+- Go outside
