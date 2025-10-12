@@ -149,9 +149,9 @@ void *malloc(size_t size) {
     // We can get away with this :3
     void *ptr = (void *)memory_space;
     memset(ptr,0,size);
-    memory_space += size+256;
+    memory_space += size+16;
     // quick alignment hack
-    memory_space -= memory_space%256;
+    memory_space -= memory_space%16;
     return ptr;
 }
 
