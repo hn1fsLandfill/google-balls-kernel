@@ -1,4 +1,5 @@
 global enable_sse
+global rdtsc
 
 .text:
 enable_sse:
@@ -11,4 +12,12 @@ enable_sse:
     or ax, 3 << 9
     mov cr4, rax
     pop rax
+    ret
+
+rdtsc:
+    push rdx
+    rdtsc
+    shl rdx, 32
+    or rax, rdx
+    pop rdx
     ret
