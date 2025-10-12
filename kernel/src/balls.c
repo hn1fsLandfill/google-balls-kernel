@@ -256,7 +256,6 @@ char cursor[] = {
 
 void input(App *app) {
     unsigned char k = ps2_poll();
-    //dot(80,80, 0xff0000 | k);
     while(k != 0x00) {
         if (k == 0xE0) {
             k = ps2_poll();
@@ -330,8 +329,6 @@ void draw(App *app) {
         }
 }
 
-void flip();
-
 void balls(uint64_t w, uint64_t h, void *framebuffer) {
 
     App app;
@@ -348,6 +345,7 @@ void balls(uint64_t w, uint64_t h, void *framebuffer) {
     app_init_points(&app);
 
     for(;;) {
+        input(&app);
         draw(&app);
         update(&app);
         flip();
