@@ -9,13 +9,15 @@ static uint32_t *gbfb;
 static Olivec_Canvas gc; 
 static uint64_t gw;
 static uint64_t gh;
+static uint64_t gp;
 
-void graphics_init(uint64_t w, uint64_t h, void *fb) {
+void graphics_init(uint64_t w, uint64_t h, void *fb, uint64_t pitch) {
     gfb = fb;
     gbfb = malloc(w*h*4);
     gc = olivec_canvas(gbfb, w, h, w);
     gw = w;
     gh = h;
+    gp = pitch/4;
 }
 
 void plot(int x, int y, uint32_t c) {
@@ -24,7 +26,7 @@ void plot(int x, int y, uint32_t c) {
     if(y > gh-1) return;
     else if(y < 0) return;
 
-    gbfb[y*gw+x] = c;
+    gbfb[y*gp+x] = c;
 }
 
 static void plot_direct(int x, int y, uint32_t c) {
@@ -33,7 +35,7 @@ static void plot_direct(int x, int y, uint32_t c) {
     if(y > gh-1) return;
     else if(y < 0) return;
 
-    gfb[y*gw+x] = c;
+    gfb[y*gp+x] = c;
 }
 
 // for debugging
