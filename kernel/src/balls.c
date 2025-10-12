@@ -230,7 +230,7 @@ void update(App *app) {
     point_collection_update(&app->pc);
 }
 
-char cursor[] = {
+static char cursor[] = {
     1,0,0,0,0,0,0,0,0,0,0,0,0,
     1,1,0,0,0,0,0,0,0,0,0,0,0,
     1,2,1,0,0,0,0,0,0,0,0,0,0,
@@ -316,17 +316,8 @@ void draw(App *app) {
     // Draw points
     point_collection_draw(&app->pc);
 
-    for(int y = 0; y<21; y++)
-        for(int x = 0; x<13; x++) {
-            switch(cursor[y*13+x]) {
-                case 1:
-                    plot(app->pc.mousePos.x+x,app->pc.mousePos.y+y, 0x00000000);
-                    break;
-                case 2:
-                    plot(app->pc.mousePos.x+x,app->pc.mousePos.y+y, 0xffffffff);
-                    break;
-            }
-        }
+    // draw cursor
+    sprite(app->pc.mousePos.x, app->pc.mousePos.y, 13, 21, cursor, 0x0, 0xffffffff);
 }
 
 void balls(uint64_t w, uint64_t h) {
