@@ -97,5 +97,12 @@ void ps2_init() {
         ps2_write(0b011);
         resp = ps2_poll_wait();
     }
+
+    // enable scancodes
+    resp = 0xFE;
+    while(resp != 0xFA) {
+        ps2_write(0xF4);
+        resp = ps2_poll_wait();
+    }
 //
 }
