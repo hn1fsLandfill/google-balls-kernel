@@ -27,6 +27,23 @@ void plot(int x, int y, uint32_t c) {
     gbfb[y*gw+x] = c;
 }
 
+static void plot_direct(int x, int y, uint32_t c) {
+    if(x > gw-1) return;
+    else if(x < 0) return;
+    if(y > gh-1) return;
+    else if(y < 0) return;
+
+    gfb[y*gw+x] = c;
+}
+
+// for debugging
+void rect_direct(int x, int y, uint32_t c) {
+    for(int y2 = 0; y2<16; y2++)
+        for(int x2 = 0; x2<16; x2++) {
+            plot_direct(x+x2,y+y2,c);
+        }
+}
+
 void rect(int x, int y, int w, int h, uint32_t c) {
     for(int y2 = 0; y2<h; y2++)
         for(int x2 = 0; x2<w; x2++) {
