@@ -21,3 +21,9 @@ rdtsc:
     or rax, rdx
     pop rdx
     ret
+
+lidt:
+    cli
+    lidt rdi
+    sti
+    ret
