@@ -28,6 +28,7 @@ static inline uint8_t inb(uint16_t port)
 
 static void panic(unsigned char c) {
     // wattesigma
+    text_direct(50, 50, "ps2 panic", 0xff0000 | c);
     rect_direct(30, 30, 0xff0000 | c);
     for(;;) { __asm__("hlt"); };
 }
@@ -69,7 +70,7 @@ void ps2_init() {
     outb(CMD, 0xA7);
     inb(DATA);
     outb(CMD, 0xAA);
-    unsigned char resp = inb(DATA);
+    unsigned char resp = ps2_poll_wait();
     if(resp != 0x55) {
         panic(resp);
     }
@@ -86,7 +87,7 @@ void ps2_init() {
     while(resp != 0xFA) {
         ps2_write(0xF0);
         ps2_write(0x02);
-        resp = ps2_poll();
+        resp = ps2_poll_wait();
     }
 
     // set numlock and caps lock led
@@ -94,7 +95,7 @@ void ps2_init() {
     while(resp != 0xFA) {
         ps2_write(0xED);
         ps2_write(0b011);
-        resp = ps2_poll();
+        resp = ps2_poll_wait();
     }
 //
 }
