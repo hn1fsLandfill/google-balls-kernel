@@ -28,8 +28,7 @@ static inline uint8_t inb(uint16_t port)
 
 static void panic(unsigned char c) {
     // wattesigma
-    text(10,10," panic: ps2 controller didn't return expected value", 0xff000000);
-    dot(30, 30, 16, 0xff0000 | c);
+    rect_direct(30, 30, 0xff0000 | c);
     for(;;) { __asm__("hlt"); };
 }
 
@@ -66,7 +65,6 @@ void ps2_write(unsigned char data) {
 }
 
 void ps2_init() {
-    return;
     outb(CMD, 0xAD);
     outb(CMD, 0xA7);
     inb(DATA);
@@ -76,25 +74,27 @@ void ps2_init() {
         panic(resp);
     }
     outb(CMD, 0x60);
-    outb(DATA, 0b00100110);
-    // outb(CMD, 0xA9);
-    // if(inb(DATA)) {
-    //     // wattesigma
-    //     dot(30, 30, 0xff0000);
-    //     for(;;) { __asm__("hlt"); };
-    // }
+    outb(DATA, 0b11100100);
+    
     outb(CMD, 0xAE);
-    outb(CMD, 0xFF);
+    outb(DATA, 0xFF);
 
-    // finally tell them keyboard to use scan code set 1
+    while(ps2_poll() != 0x0) {};
 
-    // too bothered to check response it's gonna be fine
-    //resp = 0xFE;
-    //while(resp == 0xFE) {
-    //    ps2_write(0xF0);
-    //    ps2_write(0x43);
-    //    resp = ps2_poll_wait();
-    //}
+    // finally tell them keyboard to use scan code set 2
+    resp = 0xFE;
+    while(resp != 0xFA) {
+        ps2_write(0xF0);
+        ps2_write(0x02);
+        resp = ps2_poll();
+    }
+
+    // set numlock and caps lock led
+    resp = 0xFE;
+    while(resp != 0xFA) {
+        ps2_write(0xED);
+        ps2_write(0b011);
+        resp = ps2_poll();
+    }
 //
-    //if(resp != 0xFA) panic(resp);
 }
