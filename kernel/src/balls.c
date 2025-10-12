@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include "math.h"
 #include "graphics/graphics.h"
+#include "x86.h"
+#include "balls.h"
 #include "mem.h"
 
 typedef struct {
@@ -219,8 +221,6 @@ static void app_init_points(App* app) {
     }
 }
 
-unsigned char ps2_poll();
-
 // left right up down
 unsigned char keys[] = {0,0,0,0};
 
@@ -329,14 +329,13 @@ void draw(App *app) {
         }
 }
 
-void balls(uint64_t w, uint64_t h, void *framebuffer) {
+void balls(uint64_t w, uint64_t h) {
 
     App app;
     memset(&app, 0, sizeof(App));
     
     app.width = w;
     app.height = h;
-    //app.fb = framebuffer;
     app.running = 1;
 
     app.pc.mousePos.x = 50; // app.width / 2.0;

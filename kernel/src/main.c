@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <limine.h>
 #include "graphics/graphics.h"
+#include "x86.h"
+#include "balls.h"
 
 // Set the base revision to 3, this is recommended as this is the latest
 // base revision described by the Limine boot protocol specification.
@@ -155,13 +157,6 @@ void *malloc(size_t size) {
     return ptr;
 }
 
-
-void balls(uint64_t w, uint64_t h, void *framebuffer);
-
-void ps2_init();
-void ps2_poll();
-void enable_sse();
-
 // The following will be our kernel's entry point.
 // If renaming kmain() to something else, make sure to change the
 // linker script accordingly.
@@ -193,22 +188,23 @@ void kmain(void) {
         length = memmap_request.response->entries[i]->length;
     }
 
+    // Limine devs are devious for this
     memory_space = hhdm_request.response->offset + base;
-
-    // Fetch the first framebuffer.
-    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-
-    // Note: we assume the framebuffer model is RGB with 32-bit pixels.
-    graphics_init(framebuffer->width, framebuffer->height, framebuffer->address);
 
     if(memory_space == 0x0) {
         // wattesigma
         hcf();
     }
 
+    // Fetch the first framebuffer.
+    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
+
+    // Note: we assume the framebuffer model is RGB with 32-bit pixels.
+    graphics_init(framebuffer->width, framebuffer->height, framebuffer->address, framebuffer->pitch);
+
     ps2_init();
 
-    balls(framebuffer->width, framebuffer->height, framebuffer->address);
+    balls(framebuffer->width, framebuffer->height);
 
     // We're done, just hang...
     hcf();

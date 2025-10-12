@@ -1,0 +1,1 @@
+void balls(uint64_t w, uint64_t h);
