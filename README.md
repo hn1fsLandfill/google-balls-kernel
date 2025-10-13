@@ -5,9 +5,9 @@ Why bother with clunky and outdated operating systems for your computing like Li
 No updates, no internet, **EXTREMELY LIGHTWEIGHT AND FAST**, **PRODUCTION READY**, **NO SOCIAL MEDIA**. Perfect for anyone including terminally online people and brainrotted indiviuals!
 
 ### System Requirements
-- A modern 64-bit x86 processor (You probably have one) which usually comes on hardware made after 2005. If you have Apple® Silicon or a 64-bit ARM® computer, you're stuck with the UEFI port.
+- A modern 64-bit x86 processor (You probably have one) which usually comes on hardware made after 2005. No ARM here.
 - 24 bit color depth capable video card (Comes on most Windows® XP era computers and later)
-- PS/2 keyboard (USB keyboards can work if you have PS/2 emulation bundled with your BIOS, if not you'll have to use the UEFI port which is coming later)
+- PS/2 keyboard (USB keyboards can work if you have PS/2 emulation bundled with your BIOS, if not you're out of luck for now.)
 - 8 megabytes of memory (on non-UEFI systems)
 - 128 megabytes of memory (on UEFI systems)
 
