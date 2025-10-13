@@ -334,11 +334,14 @@ void balls(uint64_t w, uint64_t h) {
     
     app_init_points(&app);
 
-    // TODO: Implement a FPS cap
     for(;;) {
+        uint64_t oldTime = timer;
         input(&app);
         draw(&app);
         update(&app);
         flip();
+        // ~66fps cap
+        int estimated = 15-(timer-oldTime);
+        if(estimated > 0) wait(estimated);
     }
 }

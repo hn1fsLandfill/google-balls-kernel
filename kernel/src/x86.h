@@ -11,6 +11,7 @@ void lidt(void *addr);
 // interrupts.c
 void enable_interrupts();
 void wait(uint32_t ms);
+extern uint64_t timer;
 
 // what is this gnu assembly abomination
 static inline void outb(uint16_t port, uint8_t val)

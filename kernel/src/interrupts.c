@@ -84,6 +84,16 @@ void enable_pic() {
     outb(MPIC_DATA, 0b11111100);
 }
 
+void enable_pit() {
+    __asm__("cli");
+    outb(0x43, 0b00110100); // channel 0 rate generator
+
+    uint16_t g = 3072;
+    outb(0x40, g & 0xff);
+    outb(0x40, g >> 8);
+    __asm__("sti");
+}
+
 void enable_interrupts() {
     idts = malloc(sizeof(struct idt64)*256);
     struct idtr *idt = malloc(sizeof(struct idtr));
@@ -107,4 +117,5 @@ void enable_interrupts() {
     __asm__("int3");
 
     enable_pic();
+    enable_pit();
 }
