@@ -334,6 +334,7 @@ void balls(uint64_t w, uint64_t h) {
     
     app_init_points(&app);
 
+    // TODO: Implement a FPS cap
     for(;;) {
         input(&app);
         draw(&app);

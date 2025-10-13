@@ -202,6 +202,8 @@ void kmain(void) {
     // Note: we assume the framebuffer model is RGB with 32-bit pixels.
     graphics_init(framebuffer->width, framebuffer->height, framebuffer->address, framebuffer->pitch);
 
+    enable_interrupts();
+
     ps2_init();
 
     balls(framebuffer->width, framebuffer->height);

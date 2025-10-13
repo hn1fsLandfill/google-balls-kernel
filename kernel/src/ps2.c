@@ -1,30 +1,10 @@
 #include <stdint.h>
 #include "graphics/graphics.h"
+#include "x86.h"
 
 #define DATA 0x60
 #define STATUS 0x64
 #define CMD 0x64
-
-// what is this gnu assembly abomination
-
-static inline void outb(uint16_t port, uint8_t val)
-{
-    __asm__ volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
-    /* There's an outb %al, $imm8 encoding, for compile-time constant port numbers that fit in 8b. (N constraint).
-     * Wider immediate constants would be truncated at assemble-time (e.g. "i" constraint).
-     * The  outb  %al, %dx  encoding is the only option for all other cases.
-     * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
-}
-
-static inline uint8_t inb(uint16_t port)
-{
-    uint8_t ret;
-    __asm__ volatile ( "inb %w1, %b0"
-                   : "=a"(ret)
-                   : "Nd"(port)
-                   : "memory");
-    return ret;
-}
 
 static void panic(unsigned char c) {
     // wattesigma
@@ -65,19 +45,30 @@ void ps2_write(unsigned char data) {
     //}
 }
 
+__attribute__((naked)) void interrupt_kb() {
+    intr_start();
+    inb(DATA);
+    rect_direct(0,0,0xff00ff);
+    intr_end();
+}
+
 void ps2_init() {
+    __asm__("cli");
     outb(CMD, 0xAD);
     outb(CMD, 0xA7);
-    inb(DATA);
+    ps2_poll();
     outb(CMD, 0xAA);
     unsigned char resp = ps2_poll_wait();
     if(resp != 0x55) {
         panic(resp);
     }
     outb(CMD, 0x60);
-    outb(DATA, 0b11100100);
+    outb(DATA, 0b00100100);
     
+    // re enable keyboard and enable irqs
     outb(CMD, 0xAE);
+
+    // reset devices
     outb(DATA, 0xFF);
 
     while(ps2_poll() != 0x0) {};
@@ -94,15 +85,22 @@ void ps2_init() {
     resp = 0xFE;
     while(resp != 0xFA) {
         ps2_write(0xED);
-        ps2_write(0b011);
+        ps2_write(0b001);
         resp = ps2_poll_wait();
     }
 
     // enable scancodes
     resp = 0xFE;
     while(resp != 0xFA) {
-        ps2_write(0xF4);
+        ps2_write(0xF6);
         resp = ps2_poll_wait();
     }
+
+    // TODO: Actually get PS2 interrupts working
+    outb(CMD, 0x60);
+    outb(DATA, 0b11100100);
+
+    ps2_poll();
+    __asm__("sti");
 //
 }
