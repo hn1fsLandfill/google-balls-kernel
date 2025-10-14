@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include "graphics/graphics.h"
 #include "x86.h"
 
@@ -36,42 +37,40 @@ unsigned char ps2_poll() {
 
 void ps2_write(unsigned char data) {
     outb(DATA, data);
-    //for(;;) {
-    //    unsigned char stat = inb(STATUS);
-    //    if(!(stat & 0x1)) {
-    //        outb(DATA, data);
-    //        return;
-    //    } else ps2_poll();
-    //}
 }
 
-__attribute__((naked)) void interrupt_kb() {
-    intr_start();
-    inb(DATA);
-    rect_direct(0,0,0xff00ff);
-    intr_end();
-}
+void ps2_controller_init() {
+    unsigned char resp;
 
-void ps2_init() {
-    __asm__("cli");
+    // disable all ps2 stuff 
     outb(CMD, 0xAD);
     outb(CMD, 0xA7);
-    ps2_poll();
+    
+    // make sure our buffer is empty
+    inb(DATA);
+    
+    // test keyboard
     outb(CMD, 0xAA);
-    unsigned char resp = ps2_poll_wait();
+    resp = ps2_poll_wait();
     if(resp != 0x55) {
         panic(resp);
     }
-    outb(CMD, 0x60);
-    outb(DATA, 0b00100100);
     
-    // re enable keyboard and enable irqs
+    // set PS2 config
+    outb(CMD, 0x60);
+    outb(DATA, PS2_CONFIG);
+    
+    // re-enable keyboard
     outb(CMD, 0xAE);
 
     // reset devices
     outb(DATA, 0xFF);
 
     while(ps2_poll() != 0x0) {};
+}
+
+void ps2_kb_init() {
+    int resp;
 
     // finally tell them keyboard to use scan code set 2
     resp = 0xFE;
@@ -85,22 +84,35 @@ void ps2_init() {
     resp = 0xFE;
     while(resp != 0xFA) {
         ps2_write(0xED);
-        ps2_write(0b001);
+        ps2_write(0b110);
         resp = ps2_poll_wait();
     }
 
     // enable scancodes
     resp = 0xFE;
     while(resp != 0xFA) {
-        ps2_write(0xF6);
+        ps2_write(0xF4);
         resp = ps2_poll_wait();
     }
 
+    ps2_poll();
+}
+
+void ps2_init() {
+    __asm__("cli");
+    ps2_controller_init();
+    ps2_kb_init();
     // TODO: Actually get PS2 interrupts working
     outb(CMD, 0x60);
-    outb(DATA, 0b11100100);
-
-    ps2_poll();
+    //// set config to
+    //// keyboard interrupt
+    //// no interrupt
+    //// passed post
+    //// nothing
+    //// clock
+    //// clock
+    //// no translation
+    //// nothing
+    //outb(DATA, 0b00110101);
     __asm__("sti");
-//
 }

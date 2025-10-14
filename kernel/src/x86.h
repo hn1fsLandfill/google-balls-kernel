@@ -3,6 +3,18 @@
 // ps2.c
 void ps2_init();
 unsigned char ps2_poll();
+char get_key();
+
+// config:
+// nothing
+// no translation
+// no clock
+// keyboard clock
+// nothing
+// passed post
+// no mouse interrupt
+// keyboard interrupt
+#define PS2_CONFIG 0b00100101
 
 // x86.asm
 void enable_sse();

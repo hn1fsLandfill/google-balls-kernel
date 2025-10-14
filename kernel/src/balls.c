@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "balls.h"
 #include "mem.h"
+#include "cursor.h"
 
 typedef struct {
     double x, y, z;
@@ -221,84 +222,83 @@ static void app_init_points(App* app) {
     }
 }
 
-// left right up down
-unsigned char keys[] = {0,0,0,0};
-
-#define SPEED 16
-
 void update(App *app) {
     point_collection_update(&app->pc);
 }
 
-static char cursor[] = {
-    1,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,1,0,0,0,0,0,0,0,0,0,0,0,
-    1,2,1,0,0,0,0,0,0,0,0,0,0,
-    1,2,2,1,0,0,0,0,0,0,0,0,0,
-    1,2,2,2,1,0,0,0,0,0,0,0,0,
-    1,2,2,2,2,1,0,0,0,0,0,0,0,
-    1,2,2,2,2,2,1,0,0,0,0,0,0,
-    1,2,2,2,2,2,2,1,0,0,0,0,0,
-    1,2,2,2,2,2,2,2,1,0,0,0,0,
-    1,2,2,2,2,2,2,2,2,1,0,0,0,
-    1,2,2,2,2,2,2,2,2,2,1,0,0,
-    1,2,2,2,2,2,2,1,1,1,1,1,0,
-    1,2,2,2,2,2,2,1,0,0,0,0,0,
-    1,2,2,2,1,2,2,1,0,0,0,0,0,
-    1,2,2,1,1,2,2,2,1,0,0,0,0,
-    1,2,1,0,0,1,2,2,1,0,0,0,0,
-    1,1,0,0,0,0,1,2,2,1,0,0,0,
-    1,0,0,0,0,0,1,2,2,1,0,0,0,
-    0,0,0,0,0,0,0,1,2,2,1,0,0,
-    0,0,0,0,0,0,0,1,2,2,1,0,0,
-    0,0,0,0,0,0,0,0,1,1,0,0,0,
+#define SPEED 16
+enum {
+    LEFT = 0,
+    RIGHT,
+    UP,
+    DOWN,
 };
+unsigned char keys[] = {0,0,0,0};
+
+// > interrupt driven ps2 keyboard driver
+// > looks inside
+// > state machine
+char extended = 0;
+
+__attribute__((naked)) void interrupt_kb() {
+    intr_start();
+    unsigned char key = ps2_poll();
+    if(key == 0xE0) extended++;
+    // certified ps2 moment
+    else if(extended == 1 && key == 0xF0) extended++;
+    else if(extended == 1) {
+        extended--;
+        switch(key) {
+            case 0x75:
+                keys[UP] = 1;
+                break;
+            case 0x72:
+                keys[DOWN] = 1;
+                break;
+            case 0x6B:
+                keys[LEFT] = 1;
+                break;
+            case 0x74:
+                keys[RIGHT] = 1;
+                break;
+            default:
+                break;
+        }
+    } else if(extended == 2) {
+        extended -= 2;
+        switch(key) {
+            case 0x75:
+                keys[UP] = 0;
+                break;
+            case 0x72:
+                keys[DOWN] = 0;
+                break;
+            case 0x6B:
+                keys[LEFT] = 0;
+                break;
+            case 0x74:
+                keys[RIGHT] = 0;
+                break;
+            default:
+                break;
+        }
+    }
+
+    outb(MPIC_CMD, PIC_EOI);
+    intr_end();
+}
 
 void input(App *app) {
-    unsigned char k = ps2_poll();
-    while(k != 0x00) {
-        if (k == 0xE0) {
-            k = ps2_poll();
-            switch(k) {
-                case 0x4B:
-                    keys[0] = 1;
-                    break;
-                case 0xCB:
-                    keys[0] = 0;
-                    break;
-                case 0x4D:
-                    keys[1] = 1;
-                    break;
-                case 0xCD:
-                    keys[1] = 0;
-                    break;
-                case 0x48:
-                    keys[2] = 1;
-                    break;
-                case 0xC8:
-                    keys[2] = 0;
-                    break;
-                case 0x50:
-                    keys[3] = 1;
-                    break;
-                case 0xD0:
-                    keys[3] = 0;
-                    break;
-            }
-        }
-        k = ps2_poll();
-    }
-
-    if(keys[0]) {
+    if(keys[LEFT]) {
         app->pc.mousePos.x -= SPEED;
     }
-    if(keys[1]) {
+    if(keys[RIGHT]) {
         app->pc.mousePos.x += SPEED;
     }
-    if(keys[2]) {
+    if(keys[UP]) {
         app->pc.mousePos.y -= SPEED;
     }
-    if(keys[3]) {
+    if(keys[DOWN]) {
         app->pc.mousePos.y += SPEED;
     }
 
