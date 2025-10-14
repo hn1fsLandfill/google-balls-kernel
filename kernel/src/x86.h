@@ -49,6 +49,9 @@ static inline void io_wait(void)
 #define ICW4_8086	0x01
 #define PIC_EOI		0x20
 
+#define MPIC_VECTOR 0x20
+#define SPIC_VECTOR 0x28
+
 struct idt64 {
    uint16_t low;
    uint16_t selector;

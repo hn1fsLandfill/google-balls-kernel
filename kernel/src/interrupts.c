@@ -7,7 +7,8 @@ __attribute__((naked)) void panic() {
     __asm__("cld");
     __asm__("pop %rax");
 
-    text_direct(10, 10, "kernel panic - general protection fault", 0xff0000);
+    text_direct(10, 10, "oops", 0xff0000);
+    text_direct(10, 18, "kernel panic - general protection fault", 0xff0000);
 
     __asm__("cli");
     for(;;) __asm__("hlt");
@@ -68,20 +69,31 @@ void install_interrupt(uint8_t v, void *func, uint8_t type) {
     idts[v].zero = 0;
 }
 
-#define MPIC_VECTOR 0x20
-
 void enable_pic() {
-    outb(MPIC_CMD, ICW1_INIT);
+    outb(MPIC_CMD, ICW1_INIT | ICW1_ICW4);
     io_wait();
 
     outb(MPIC_DATA, MPIC_VECTOR);
     io_wait();
 
+    outb(SPIC_DATA, SPIC_VECTOR);
+    io_wait();
+
+    outb(MPIC_DATA, 4);
+    io_wait();
+
+    outb(SPIC_DATA, 2);
+    io_wait();
+
     outb(MPIC_DATA, ICW4_8086);
+    io_wait();
+
+    outb(SPIC_DATA, ICW4_8086);
     io_wait();
 
     // unmask only the keyboard and clock for now
     outb(MPIC_DATA, 0b11111100);
+    outb(SPIC_DATA, 0b11111111);
 }
 
 void enable_pit() {
@@ -110,8 +122,8 @@ void enable_interrupts() {
         install_interrupt(MPIC_VECTOR + off, interrupt_stub_hw, INTERRUPT);
     }
 
-    install_interrupt(MPIC_VECTOR, interrupt_timer, TRAP);
-    install_interrupt(MPIC_VECTOR+1, interrupt_kb, TRAP);
+    install_interrupt(MPIC_VECTOR, interrupt_timer, INTERRUPT);
+    install_interrupt(MPIC_VECTOR+1, interrupt_kb, INTERRUPT);
 
     // Quick sanity check
     __asm__("int3");
