@@ -1,7 +1,8 @@
 #include "x86.h"
-#include "mem.h"
+#include "../mem.h"
 #include <stdint.h>
-#include "graphics/graphics.h"
+#include "../graphics/graphics.h"
+#include "../balls.h"
 
 __attribute__((naked)) void panic() {
     __asm__("cld");
@@ -28,7 +29,58 @@ void wait(uint32_t ms) {
     while(newtimer > timer) __asm__("hlt");
 }
 
-void interrupt_kb();
+// > interrupt driven ps2 keyboard driver
+// > looks inside
+// > state machine
+char extended = 0;
+
+__attribute__((naked)) void interrupt_kb() {
+    intr_start();
+    unsigned char key = ps2_poll();
+    if(key == 0xE0) extended++;
+    // certified ps2 moment
+    else if(extended == 1 && key == 0xF0) extended++;
+    else if(extended == 1) {
+        extended--;
+        switch(key) {
+            case 0x75:
+                new_kb_event(UP, 1);
+                break;
+            case 0x72:
+                new_kb_event(DOWN, 1);
+                break;
+            case 0x6B:
+                new_kb_event(LEFT, 1);
+                break;
+            case 0x74:
+                new_kb_event(RIGHT, 1);
+                break;
+            default:
+                break;
+        }
+    } else if(extended == 2) {
+        extended -= 2;
+        switch(key) {
+            case 0x75:
+                new_kb_event(UP, 0);
+                break;
+            case 0x72:
+                new_kb_event(DOWN, 0);
+                break;
+            case 0x6B:
+                new_kb_event(LEFT, 0);
+                break;
+            case 0x74:
+                new_kb_event(RIGHT, 0);
+                break;
+            default:
+                break;
+        }
+    }
+
+    outb(MPIC_CMD, PIC_EOI);
+    intr_end();
+}
 
 __attribute__((naked)) void interrupt_stub_hw() {
     intr_start();

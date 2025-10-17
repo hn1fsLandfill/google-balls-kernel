@@ -1,6 +1,7 @@
 global enable_sse
 global rdtsc
 global lidt
+global imcooked
 
 %macro pushar 0
     push rsp
@@ -68,3 +69,8 @@ lidt:
     lidt [rdi]
     sti
     ret
+
+imcooked:
+    cli
+    hlt
+    jmp imcooked

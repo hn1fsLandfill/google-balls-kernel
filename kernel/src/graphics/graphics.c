@@ -1,4 +1,5 @@
 #include <stdint.h>
+#define GRAPHICS_C
 #include "graphics.h"
 #include "mem.h"
 #define OLIVEC_IMPLEMENTATION
@@ -7,8 +8,8 @@
 static uint32_t *gfb;
 static uint32_t *gbfb;
 static Olivec_Canvas gc; 
-static uint64_t gw;
-static uint64_t gh;
+uint64_t gw;
+uint64_t gh;
 static uint64_t gp;
 
 void graphics_init(uint64_t w, uint64_t h, void *fb, uint64_t pitch) {

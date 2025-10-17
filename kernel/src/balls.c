@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include "math.h"
 #include "graphics/graphics.h"
-#include "x86.h"
+#include "time.h"
 #include "balls.h"
 #include "mem.h"
 #include "cursor.h"
@@ -227,65 +227,10 @@ void update(App *app) {
 }
 
 #define SPEED 16
-enum {
-    LEFT = 0,
-    RIGHT,
-    UP,
-    DOWN,
-};
 unsigned char keys[] = {0,0,0,0};
 
-// > interrupt driven ps2 keyboard driver
-// > looks inside
-// > state machine
-char extended = 0;
-
-__attribute__((naked)) void interrupt_kb() {
-    intr_start();
-    unsigned char key = ps2_poll();
-    if(key == 0xE0) extended++;
-    // certified ps2 moment
-    else if(extended == 1 && key == 0xF0) extended++;
-    else if(extended == 1) {
-        extended--;
-        switch(key) {
-            case 0x75:
-                keys[UP] = 1;
-                break;
-            case 0x72:
-                keys[DOWN] = 1;
-                break;
-            case 0x6B:
-                keys[LEFT] = 1;
-                break;
-            case 0x74:
-                keys[RIGHT] = 1;
-                break;
-            default:
-                break;
-        }
-    } else if(extended == 2) {
-        extended -= 2;
-        switch(key) {
-            case 0x75:
-                keys[UP] = 0;
-                break;
-            case 0x72:
-                keys[DOWN] = 0;
-                break;
-            case 0x6B:
-                keys[LEFT] = 0;
-                break;
-            case 0x74:
-                keys[RIGHT] = 0;
-                break;
-            default:
-                break;
-        }
-    }
-
-    outb(MPIC_CMD, PIC_EOI);
-    intr_end();
+void new_kb_event(unsigned char keycode, int pressed) {
+    keys[keycode] = pressed ? 1 : 0;
 }
 
 void input(App *app) {
@@ -320,13 +265,13 @@ void draw(App *app) {
     sprite(app->pc.mousePos.x, app->pc.mousePos.y, 13, 21, cursor, 0x0, 0xffffffff);
 }
 
-void balls(uint64_t w, uint64_t h) {
+void balls() {
 
     App app;
     memset(&app, 0, sizeof(App));
     
-    app.width = w;
-    app.height = h;
+    app.width = gw;
+    app.height = gh;
     app.running = 1;
 
     app.pc.mousePos.x = 50; // app.width / 2.0;
