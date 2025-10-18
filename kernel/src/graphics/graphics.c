@@ -3,7 +3,7 @@
 #include <graphics.h>
 #include <mem.h>
 #define OLIVEC_IMPLEMENTATION
-#include <olive.h>
+#include "olive.h"
 
 static uint32_t *gfb;
 static uint32_t *gbfb;
