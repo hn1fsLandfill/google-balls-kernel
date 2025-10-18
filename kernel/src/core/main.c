@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "balls.h"
+#include <balls.h>
 
 void platform_init();
 void imcooked();

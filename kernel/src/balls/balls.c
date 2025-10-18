@@ -1,12 +1,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include "math.h"
-#include "graphics/graphics.h"
-#include "time.h"
-#include "balls.h"
-#include "mem.h"
-#include "cursor.h"
+#include <math.h>
+#include <graphics.h>
+#include <time.h>
+#include <balls.h>
+#include <mem.h>
+#include <cursor.h>
 
 typedef struct {
     double x, y, z;

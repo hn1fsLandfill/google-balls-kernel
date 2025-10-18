@@ -1,9 +1,9 @@
 #include <limine.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "../graphics/graphics.h"
-#include "x86.h"
-#include "../mem.h"
+#include <graphics.h>
+#include <x86.h>
+#include <mem.h>
 
 // Set the base revision to 3, this is recommended as this is the latest
 // base revision described by the Limine boot protocol specification.

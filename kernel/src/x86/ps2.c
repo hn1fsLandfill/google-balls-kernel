@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "graphics/graphics.h"
-#include "x86.h"
+#include <graphics.h>
+#include <x86.h>
 
 #define DATA 0x60
 #define STATUS 0x64

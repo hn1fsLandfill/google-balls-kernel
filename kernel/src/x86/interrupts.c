@@ -1,8 +1,8 @@
-#include "x86.h"
-#include "../mem.h"
+#include <x86.h>
+#include <mem.h>
 #include <stdint.h>
-#include "../graphics/graphics.h"
-#include "../balls.h"
+#include <graphics.h>
+#include <balls.h>
 
 __attribute__((naked)) void panic() {
     __asm__("cld");
