@@ -3,6 +3,7 @@ global rdtsc
 global lidt
 global imcooked
 global get_rbp
+global get_all_registers
 extern kmain_kernel
 global kmain
 
@@ -14,7 +15,6 @@ global kmain
     push rdx
     push rdi
     push rsi
-    push rdx
     push rcx
     push r8
     push r9
@@ -36,7 +36,6 @@ global kmain
     pop r9
     pop r8
     pop rcx
-    pop rdx
     pop rsi
     pop rdi
     pop rdx
@@ -80,6 +79,10 @@ imcooked:
 
 get_rbp:
     mov rax, rbp
+    ret
+
+get_all_registers:
+    pushar
     ret
 
 kmain:

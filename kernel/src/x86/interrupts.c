@@ -33,6 +33,20 @@ void uint64ToHex(uint64_t x, char *h) {
     reverse(h, ptr);
 }
 
+void printNumber(int x, int y, uint64_t n) {
+    char str[32] = {0};
+
+    uint64ToHex(n, str);
+    text_direct(x, y, str, 0xff0000);
+}
+
+// todo figure this out i guess before it works
+void print_regs() {
+    struct x86_64_regs regs = get_all_registers();
+
+    printNumber(10, 200, regs.rax);
+}
+
 struct stackframe {
   struct stackframe* rbp;
   uint64_t rip;
@@ -41,24 +55,18 @@ struct stackframe {
 struct stackframe *get_rbp();
 
 void panic(uint64_t code, char *reason) {
-    char str[32] = {0};
-
     text_direct(10, 10, "oops - google balls kernel has crashed, we are sorry for any inconveniences.", 0xff0000);
     text_direct(10, 18, reason, 0xff0000);
 
-    uint64ToHex(code, str);
-
     text_direct(10, 28, "code ", 0xff0000);
-    text_direct(90, 28, str, 0xff0000);
+
+    printNumber(90, 28, code);
 
     struct stackframe *stk = get_rbp();
     text_direct(90, 40, "-- stack trace --", 0xff0000);
     for(unsigned int frame = 0; stk && frame < 16; frame++) {
         // Unwind to previous stack frame
-
-        uint64ToHex(stk->rip, str);
-        text_direct(90, 48+(16*frame), str, 0xff0000);
-    
+        printNumber(90, 48+(16*frame), stk->rip);
         stk = stk->rbp;
     }
 
@@ -78,9 +86,11 @@ __attribute__((naked)) void panic_df(uint64_t code) {
     imcooked();
 }
 __attribute__((naked)) void panic_pf(uint64_t code) {
-    __asm__("pop %rdi");
     __asm__("cld");
+
+    __asm__("pop %rdi");
     panic(code, "kernel panic - page fault");
+    
     imcooked();
 }
 
