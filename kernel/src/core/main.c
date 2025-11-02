@@ -6,7 +6,7 @@
 void platform_init();
 void imcooked();
 
-void kmain(void) {
+void kmain_kernel(void) {
     platform_init();
 
     balls();

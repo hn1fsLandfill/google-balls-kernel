@@ -4,12 +4,68 @@
 #include <graphics.h>
 #include <balls.h>
 
-__attribute__((naked)) void panic() {
-    __asm__("cld");
-    __asm__("pop %rax");
+static const char hex[16] = {
+	"0123456789abcdef"
+};
 
-    text_direct(10, 10, "oops", 0xff0000);
+void reverse(char *h, int l) {
+    char c = 0;
+    int j = 0;
+
+    for (int i = 0, j = l - 1; i < j; i++, j--) {
+        c = h[i];
+        h[i] = h[j];
+        h[j] = c;
+    }
+}
+
+void uint64ToHex(uint64_t x, char *h) {
+    float d = 1;
+
+    int ptr = 0;
+
+    while(x != 0) {
+        h[ptr] = hex[x%16];
+        x /= 16;
+        ptr++;
+    }
+
+    reverse(h, ptr);
+}
+
+struct stackframe {
+  struct stackframe* rbp;
+  uint64_t rip;
+};
+
+struct stackframe *get_rbp();
+
+static char str[32] = {0};
+
+__attribute__((naked)) void panic(uint64_t code) {
+    __asm__("pop %rdi");
+
+    __asm__("cld");
+
+    text_direct(10, 10, "oops - google balls kernel has crashed, we are sorry for any inconveniences.", 0xff0000);
     text_direct(10, 18, "kernel panic - general protection fault", 0xff0000);
+
+    uint64ToHex(code, str);
+
+    text_direct(10, 28, "code ", 0xff0000);
+    text_direct(90, 28, str, 0xff0000);
+
+    struct stackframe *stk = get_rbp();
+    text_direct(90, 40, "-- stack trace --", 0xff0000);
+    for(unsigned int frame = 0; stk && frame < 16; frame++) {
+        // Unwind to previous stack frame
+
+        uint64ToHex(stk->rip, str);
+        text_direct(90, 48+(16*frame), str, 0xff0000);
+    
+        stk = stk->rbp;
+    }
+
 
     __asm__("cli");
     for(;;) __asm__("hlt");
@@ -85,6 +141,14 @@ __attribute__((naked)) void interrupt_kb() {
 __attribute__((naked)) void interrupt_stub_hw() {
     intr_start();
     outb(MPIC_CMD, PIC_EOI);
+    intr_end();
+}
+
+__attribute__((naked)) void interrupt_stub_hw_2() {
+    intr_start();
+    rect_direct(0,0, 0xff0000);
+    outb(MPIC_CMD, PIC_EOI);
+    outb(SPIC_CMD, PIC_EOI);
     intr_end();
 }
 
@@ -172,6 +236,10 @@ void enable_interrupts() {
 
     for(int off = 0; off<8; off++) {
         install_interrupt(MPIC_VECTOR + off, interrupt_stub_hw, INTERRUPT);
+    }
+
+    for(int off = 0; off<8; off++) {
+        install_interrupt(SPIC_VECTOR + off, interrupt_stub_hw_2, INTERRUPT);
     }
 
     install_interrupt(MPIC_VECTOR, interrupt_timer, INTERRUPT);

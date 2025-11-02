@@ -28,8 +28,10 @@ endif
 # User controllable C compiler command.
 ifneq ($(TOOLCHAIN_PREFIX),)
     CC := $(TOOLCHAIN_PREFIX)gcc
+    NM := $(TOOLCHAIN_PREFIX)nm
 else
     CC := cc
+    NM := nm
 endif
 
 # User controllable linker command.
@@ -74,6 +76,7 @@ override CFLAGS += \
     -ffreestanding \
     -fno-stack-protector \
     -fno-stack-check \
+    -fno-omit-frame-pointer \
     -fno-lto \
     -fno-PIC \
     -ffunction-sections \
@@ -189,7 +192,7 @@ override HEADER_DEPS := $(addprefix obj-$(ARCH)/,$(CFILES:.c=.c.d) $(ASFILES:.S=
 
 # Default target. This must come first, before header dependencies.
 .PHONY: all
-all: bin-$(ARCH)/$(OUTPUT)
+all: bin-$(ARCH)/$(OUTPUT) symbols
 
 # Include header dependencies.
 -include $(HEADER_DEPS)
@@ -198,6 +201,9 @@ all: bin-$(ARCH)/$(OUTPUT)
 bin-$(ARCH)/$(OUTPUT): GNUmakefile linker-scripts/$(ARCH).lds $(OBJ)
 	mkdir -p "$(dir $@)"
 	$(LD) $(LDFLAGS) $(OBJ) -o $@
+
+symbols: bin-$(ARCH)/$(OUTPUT)
+	$(NM) bin-$(ARCH)/$(OUTPUT) > $@ 
 
 # Compilation rules for *.c files.
 obj-$(ARCH)/%.c.o: %.c GNUmakefile

@@ -2,6 +2,9 @@ global enable_sse
 global rdtsc
 global lidt
 global imcooked
+global get_rbp
+extern kmain_kernel
+global kmain
 
 %macro pushar 0
     push rsp
@@ -74,3 +77,12 @@ imcooked:
     cli
     hlt
     jmp imcooked
+
+get_rbp:
+    mov rax, rbp
+    ret
+
+kmain:
+    xor rbp, rbp
+    call kmain_kernel
+    call imcooked

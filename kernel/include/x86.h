@@ -12,9 +12,9 @@ char get_key();
 // keyboard clock
 // nothing
 // passed post
-// no mouse interrupt
+// mouse interrupt
 // keyboard interrupt
-#define PS2_CONFIG 0b00100101
+#define PS2_CONFIG 0b00100111
 
 // x86.asm
 void enable_sse();
@@ -46,7 +46,9 @@ static inline uint8_t inb(uint16_t port)
 
 static inline void io_wait(void)
 {
-    outb(0x80, 0);
+    // outb trick kernel panics
+    // outb(0x80, 0);
+    for(int i = 0; i<64; i++) { asm("nop"); }
 }
 
 // interrupt stuff

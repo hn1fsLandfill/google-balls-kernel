@@ -49,7 +49,7 @@ void ps2_controller_init() {
     // make sure our buffer is empty
     inb(DATA);
     
-    // test keyboard
+    // test ps2 controller
     outb(CMD, 0xAA);
     resp = ps2_poll_wait();
     if(resp != 0x55) {
@@ -62,6 +62,7 @@ void ps2_controller_init() {
     
     // re-enable keyboard
     outb(CMD, 0xAE);
+    outb(CMD, 0xA8);
 
     // reset devices
     outb(DATA, 0xFF);
@@ -98,21 +99,25 @@ void ps2_kb_init() {
     ps2_poll();
 }
 
+void ps2_mouse_init() {
+    int resp;
+
+    // reset ps2 mouse
+    outb(CMD, 0xD4);
+    outb(DATA, 0xFF);
+    while(ps2_poll() != 0x0) {};
+
+    // enable packet streaming
+    outb(CMD, 0xD4);
+    outb(DATA, 0xF6);
+    resp = ps2_poll_wait();
+    if(resp != 0xFA) panic(resp);
+}
+
 void ps2_init() {
     __asm__("cli");
     ps2_controller_init();
     ps2_kb_init();
-    // TODO: Actually get PS2 interrupts working
-    outb(CMD, 0x60);
-    //// set config to
-    //// keyboard interrupt
-    //// no interrupt
-    //// passed post
-    //// nothing
-    //// clock
-    //// clock
-    //// no translation
-    //// nothing
-    //outb(DATA, 0b00110101);
+    ps2_mouse_init();
     __asm__("sti");
 }
