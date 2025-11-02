@@ -40,15 +40,11 @@ struct stackframe {
 
 struct stackframe *get_rbp();
 
-static char str[32] = {0};
-
-__attribute__((naked)) void panic(uint64_t code) {
-    __asm__("pop %rdi");
-
-    __asm__("cld");
+void panic(uint64_t code, char *reason) {
+    char str[32] = {0};
 
     text_direct(10, 10, "oops - google balls kernel has crashed, we are sorry for any inconveniences.", 0xff0000);
-    text_direct(10, 18, "kernel panic - general protection fault", 0xff0000);
+    text_direct(10, 18, reason, 0xff0000);
 
     uint64ToHex(code, str);
 
@@ -66,9 +62,26 @@ __attribute__((naked)) void panic(uint64_t code) {
         stk = stk->rbp;
     }
 
+    imcooked();
+}
 
-    __asm__("cli");
-    for(;;) __asm__("hlt");
+__attribute__((naked)) void panic_gpf(uint64_t code) {
+    __asm__("pop %rdi");
+    __asm__("cld");
+    panic(code, "kernel panic - general protection fault");
+    imcooked();
+}
+__attribute__((naked)) void panic_df(uint64_t code) {
+    __asm__("pop %rdi");
+    __asm__("cld");
+    panic(code, "kernel panic - double fault");
+    imcooked();
+}
+__attribute__((naked)) void panic_pf(uint64_t code) {
+    __asm__("pop %rdi");
+    __asm__("cld");
+    panic(code, "kernel panic - page fault");
+    imcooked();
 }
 
 uint64_t timer = 0;
@@ -232,7 +245,9 @@ void enable_interrupts() {
     lidt(idt);
 
     install_interrupt(0x3, interrupt_stub, TRAP);
-    install_interrupt(0xD, panic, TRAP);
+    install_interrupt(0xD, panic_gpf, TRAP);
+    install_interrupt(0xE, panic_pf, TRAP);
+    install_interrupt(0x8, panic_df, TRAP);
 
     for(int off = 0; off<8; off++) {
         install_interrupt(MPIC_VECTOR + off, interrupt_stub_hw, INTERRUPT);
