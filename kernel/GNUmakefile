@@ -128,8 +128,7 @@ ifeq ($(ARCH),aarch64)
     endif
     override CFLAGS += \
         -mcpu=generic \
-        -march=armv8-a+nofp+nosimd \
-        -mgeneral-regs-only
+        -march=armv8-a+nosimd
     override LDFLAGS += \
         -m aarch64elf
 endif
