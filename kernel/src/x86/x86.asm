@@ -4,6 +4,8 @@ global lidt
 global imcooked
 global get_rbp
 global get_all_registers
+global inb
+global outb
 extern kmain_kernel
 global kmain
 
@@ -83,6 +85,18 @@ get_rbp:
 
 get_all_registers:
     pushar
+    ret
+
+inb:
+    xor rax, rax
+    mov dx, di
+    in al, dx
+    ret
+
+outb:
+    mov dx, di
+    mov al, sil
+    out dx, al
     ret
 
 kmain:
