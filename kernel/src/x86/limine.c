@@ -35,6 +35,12 @@ static volatile struct limine_hhdm_request hhdm_request = {
     .revision = 0
 };
 
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_executable_cmdline_request cmdline_request = {
+    .id = LIMINE_EXECUTABLE_CMDLINE_REQUEST,
+    .revision = 0
+};
+
 // Finally, define the start and end markers for the Limine requests.
 // These can also be moved anywhere, to any .c file, as seen fit.
 
@@ -50,6 +56,8 @@ static void hcf(void) {
         asm ("hlt");
     }
 }
+
+bool disableInterrupts = false;
 
 void platform_init() {
 	// enable them fancy sse but why the fuck do i have to do this anyway
@@ -88,7 +96,14 @@ void platform_init() {
     // Note: we assume the framebuffer model is RGB with 32-bit pixels.
     graphics_init(framebuffer->width, framebuffer->height, framebuffer->address, framebuffer->pitch);
 
-    enable_interrupts();
+    
+    char *cmdline = cmdline_request.response->cmdline;
+
+    if(cmdline[0] == 'n' && cmdline[1] == 'o' && cmdline[2] == 'i' && cmdline[3] == 'n' && cmdline[4] == 't') {
+        disableInterrupts = true;
+    }
+
+    if(!disableInterrupts) enable_interrupts();
 
     ps2_init();
 }
