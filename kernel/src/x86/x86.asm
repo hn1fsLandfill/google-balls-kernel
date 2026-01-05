@@ -6,6 +6,7 @@ global get_rbp
 global get_all_registers
 global inb
 global outb
+global io_wait
 extern kmain_kernel
 global kmain
 
@@ -97,6 +98,15 @@ outb:
     mov dx, di
     mov al, sil
     out dx, al
+    ret
+
+io_wait:
+    xor rcx, rcx
+io_wait_loop:
+    nop
+    add rcx, 1
+    cmp rcx, 64
+    jl io_wait_loop
     ret
 
 kmain:
