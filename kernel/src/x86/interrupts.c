@@ -232,7 +232,7 @@ void enable_pic() {
 
     // unmask only the keyboard and clock for now
     outb(MPIC_DATA, 0b11111100);
-    outb(SPIC_DATA, 0b11111111);
+    outb(SPIC_DATA, 0b11100111);
 }
 
 void enable_pit() {
